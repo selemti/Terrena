@@ -12,14 +12,14 @@ require __DIR__ . '/helpers.php';
 require __DIR__ . '/middleware/AuthMiddleware.php';
 
 // Controllers
-require __DIR__ . '/controllers/AuthController.php';
-require __DIR__ . '/controllers/HealthController.php';
-require __DIR__ . '/controllers/SesionesController.php';
-require __DIR__ . '/controllers/PreCorteController.php';
-require __DIR__ . '/controllers/PostCorteController.php';
-require __DIR__ . '/controllers/ConciliacionController.php';
-require __DIR__ . '/controllers/FormasPagoController.php';
-require __DIR__ . '/controllers/CajasController.php';
+require __DIR__ . '/controllers/caja/AuthController.php';
+require __DIR__ . '/controllers/caja/HealthController.php';
+require __DIR__ . '/controllers/caja/SesionesController.php';
+require __DIR__ . '/controllers/caja/PreCorteController.php';
+require __DIR__ . '/controllers/caja/PostCorteController.php';
+require __DIR__ . '/controllers/caja/ConciliacionController.php';
+require __DIR__ . '/controllers/caja/FormasPagoController.php';
+require __DIR__ . '/controllers/caja/CajasController.php';
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

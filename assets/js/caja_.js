@@ -210,7 +210,7 @@
         <td>${esc(r.name ?? r.id ?? '—')}</td>
         <td>${esc(r.assigned_name ?? '—')}</td>
         <td>${esc(r?.window?.day ?? state.date ?? '—')}</td>
-        <td>${r?.status?.asignada ? (r?.status?.activa ? '<span class="badge bg-success">Asignada</span>':'<span class="badge bg-info">Asignada</span>') : '<span class="badge bg-secondary">Libre</span>'}</td>
+        <td>${r?.status?.asignada ? (r?.status?.activa ? '<span class="badge bg-success">Asignada</span>':'<span class="badge bg-info">Asignada</span>') : '<span class="badge bg-secondary">Cerrada</span>'}</td>
         <td class="text-end">${MXN.format(Number(r.opening_balance||0))}</td>
         <td class="text-end">${MXN.format(Number(r?.sales?.assigned_total ?? r?.sales?.terminal_total ?? 0))}</td>
         <td class="text-end">${MXN.format(0)}</td>

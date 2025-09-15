@@ -11,8 +11,8 @@ class CajasController {
 
     // 1) /api/config.php o /config.php deben devolver un PDO
     $candidates = [
-      __DIR__ . '/../config.php',
-      __DIR__ . '/../../config.php'
+      __DIR__ . '/../../config.php',
+      __DIR__ . '/../../../config.php'
     ];
     foreach ($candidates as $c) {
       if (is_file($c)) {
@@ -22,8 +22,8 @@ class CajasController {
     }
 
     // 2) Fallback a tu core/database.php (expone $pdo o función pdo())
-    if (is_file(__DIR__.'/../core/database.php')) {
-      require_once __DIR__.'/../core/database.php';
+    if (is_file(__DIR__.'/../../core/database.php')) {
+      require_once __DIR__.'/../../core/database.php';
       if (isset($pdo) && $pdo instanceof PDO) return $pdo;
       if (function_exists('pdo')) {
         $pdo = pdo();

@@ -63,7 +63,7 @@ export function renderTabla(){
         r?.status?.asignada
           ? (r?.status?.activa ? '<span class="badge bg-success">Asignada</span>'
                                 : '<span class="badge bg-info">Asignada</span>')
-          : '<span class="badge bg-secondary">Libre</span>'
+          : '<span class="badge bg-secondary">Cerrada</span>'
       }</td>
       <td class="text-end">${MXN.format(Number(r.opening_balance||0))}</td>
       <td class="text-end">${MXN.format(Number(r?.sales?.assigned_total ?? r?.sales?.terminal_total ?? 0))}</td>
