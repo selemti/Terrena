@@ -1,0 +1,24 @@
+{
+    "name": "terrena/selemti",
+    "description": "Terrena POS Admin",
+    "type": "project",
+    "require": {
+        "slim/slim": "^4.11",
+        "slim/psr7": "^1.7",
+        "firebase/php-jwt": "^6.11",
+        "vlucas/phpdotenv": "5",
+        "mike42/escpos-php": "^2.2"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Terrena\\Selemti\\": "src/",
+			"Terrena\\Core\\": "src/Core/"
+        }
+    },
+    "authors": [
+        {
+            "name": "SelemTI"
+        }
+    ]
+}

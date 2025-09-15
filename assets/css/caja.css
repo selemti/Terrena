@@ -1,0 +1,20 @@
+/* assets/css/caja.css — módulo Caja */
+.cz-toast{position:fixed;right:16px;bottom:16px;background:#111;color:#fff;padding:10px 12px;border-radius:6px;opacity:.0;transform:translateY(8px);transition:.2s;z-index:1080}
+.cz-toast.show{opacity:0.95;transform:translateY(0)}
+.kpi{background:#f8f9fb;border:1px solid #e9ecef;border-radius:8px;padding:10px}
+.kpi-label{font-size:.8rem;color:#6c757d}
+.kpi-value{font-weight:700;font-size:1.1rem}
+#czPrecorteAutosave{min-width:180px}
+/* badges auxiliares (si no existen en tu theme) */
+.bg-indigo{background-color:#4b0082!important;color:#fff!important}
+.bg-violet{background-color:#7f00ff!important;color:#fff!important}
+.bg-teal{background-color:#20c997!important;color:#fff!important}
+#toastWrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.toast{min-width:280px;max-width:420px;padding:12px 14px;border-radius:8px;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.2);opacity:.98;transition:opacity .2s,transform .2s}
+.toast.ok{background:#198754}.toast.info{background:#0d6efd}
+.toast.warn{background:#ffc107;color:#111}.toast.err{background:#dc3545}
+.toast.hide{opacity:0;transform:translateY(6px)}
+.toast .row{display:flex;align-items:center;gap:8px}
+.toast .ttl{font-weight:600;margin-right:auto}
+.toast .close{cursor:pointer;font-weight:bold}
+.toast .bar{height:3px;background:rgba(255,255,255,.6);width:100%;transform-origin:left}

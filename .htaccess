@@ -1,0 +1,13 @@
+RewriteEngine On
+RewriteBase /terrena/Terrena/
+
+# Sirve archivos reales tal cual
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Enruta /api/ a api/index.php
+RewriteRule ^api/(.*)$ api/index.php [L,QSA]
+
+# Enruta todo lo demás a index.php (frontend)
+RewriteRule ^ index.php [L,QSA]

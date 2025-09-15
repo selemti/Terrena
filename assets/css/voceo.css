@@ -1,0 +1,582 @@
+ /* --- Estilos para TV 720p con identidad Terrena --- */
+    :root {
+      --bg-main: #EAEAEA;
+      --green-dark: #234330;
+      --green-darker: #1E3A2A;
+      --orange: #E97A3A;
+      --gold: #D2B464;
+      --gray-light: #F5F5F5;
+      --gray-medium: #DDD;
+      --text-dark: #333;
+      --text-light: #FFF;
+    }
+ 
+/* =========================
+   Fuentes locales (carpeta ./font)
+   ========================= */
+@font-face {
+  font-family: 'Anton';
+  src: url('../font/Anton/Anton-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Montserrat (usaremos Regular, SemiBold y Black) */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../font/Montserrat/static/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../font/Montserrat/static/Montserrat-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../font/Montserrat/static/Montserrat-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Roboto (Regular y Medium para listas/fechas) */
+@font-face {
+  font-family: 'Roboto';
+  src: url('../font/Roboto/static/Roboto-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Roboto';
+  src: url('../font/Roboto/static/Roboto-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Open Sans (para la franja de promoción) */
+@font-face {
+  font-family: 'Open Sans';
+  src: url('../font/Open_Sans/static/OpenSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Archivo Black (opcional para headers muy pesados si luego lo usas) */
+@font-face {
+  font-family: 'Archivo Black';
+  src: url('../font/Archivo_Black/ArchivoBlack-Regular.ttf') format('truetype');
+  font-weight: 400; /* Archivo Black expone su peso como regular */
+  font-style: normal;
+  font-display: swap;
+}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: var(--bg-main);
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23c5c5c5' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+      color: var(--text-dark);
+      width: 1280px;
+      height: 720px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 20px;
+    }
+    
+    /* Barra superior */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      background-color: var(--green-dark);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .logo {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      color: var(--text-light);
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    
+    .logo i {
+      margin-right: 12px;
+      color: var(--gold);
+    }
+    
+    .datetime {
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: var(--text-light);
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+    
+    .conn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-light);
+      font-weight: 500;
+      font-size: 1.4rem;
+      opacity: 0.9;
+    }
+    
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #576477;
+    }
+    
+    .dot.ok {
+      background: #30d18b;
+    }
+    
+    .dot.err {
+      background: #ef5a5a;
+    }
+    
+    /* Sección principal */
+    .main-content {
+      display: flex;
+      flex: 1;
+      gap: 25px;
+    }
+    
+    /* Hero - última orden */
+    .hero-section {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--green-dark);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .hero-title {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--gold);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+.order-number {
+  font-family: 'Anton', sans-serif;
+  font-size: 15rem;
+  font-weight: normal; /* ya que Anton solo tiene un grosor */
+  color: var(--text-light);
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+  line-height: 1;
+  margin: 20px 0;
+  letter-spacing: 2px;
+}
+    
+    .order-name {
+      font-size: 3.5rem;
+      text-align: center;
+      color: var(--orange);
+      margin-top: 15px;
+      font-weight: 600;
+      padding: 15px 30px;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Lista de órdenes pasadas */
+    .past-orders {
+      flex: 2;
+      background-color: var(--gray-light);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--gray-medium);
+    }
+    
+    .past-orders-title {
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+      text-align: center;
+      color: var(--orange);
+      font-weight: 600;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--gray-medium);
+      text-transform: uppercase;
+    }
+    
+    .orders-list {
+      list-style-type: none;
+      flex: 1;
+    }
+    
+    .order-item {
+      font-size: 1.6rem;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      background-color: #FFFFFF;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid var(--green-dark);
+      transition: all 0.3s ease;
+    }
+    
+    .order-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .order-number-past {
+      font-weight: 600;
+      color: var(--green-dark);
+    }
+    
+    .order-name-past {
+      color: #555;
+      font-weight: 500;
+    }
+    
+    .order-item:not(:last-child) {
+      border-bottom: 1px solid #EEE;
+    }
+    
+    /* Footer */
+    footer {
+      background-color: var(--green-darker);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.5s ease;
+      color: var(--text-light);
+      position: relative;
+    }
+    
+    .footer-hidden {
+      transform: translateY(120%);
+      opacity: 0;
+    }
+    
+    .promotion {
+      font-weight: 500;
+      color: var(--text-light);
+      letter-spacing: 0.5px;
+    }
+    
+    /* Controles de voz */
+    .voice-controls {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 30;
+    }
+    
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--orange);
+      color: var(--text-light);
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.25);
+    }
+    
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--orange);
+      color: var(--orange);
+    }
+    
+    /* Animaciones */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes newOrder {
+      0% { background-color: rgba(233, 122, 58, 0.3); }
+      100% { background-color: var(--green-dark); }
+    }
+    
+    .new-order {
+      animation: newOrder 1s ease;
+    }
+    
+    .pop {
+      animation: pop 0.42s ease-out 1;
+    }
+    
+    @keyframes pop {
+      0% { opacity: 0; transform: translateY(-4px); }
+      100% { opacity: 1; }
+    }
+    
+    /* Overlay de controles (oculto por defecto) */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 12, 20, 0.6);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+    }
+    
+    .overlay.show {
+      display: flex;
+    }
+    
+    .panel {
+      width: min(860px, 90vw);
+      background: #0f1624;
+      border: 1px solid #1b2433;
+      border-radius: 16px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+      padding: 18px;
+      color: #d6e2f0;
+      display: grid;
+      gap: 14px;
+    }
+	
+/* =========================
+   Base: tipografía por defecto
+   ========================= */
+body, .container, .panel, .order-item, .orders-list {
+  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* =========================
+   Overrides de clases existentes
+   ========================= */
+
+/* Número grande de orden */
+.order-number {
+  font-family: 'Anton', sans-serif;
+  font-weight: 400; /* Anton solo tiene un peso */
+  letter-spacing: 2px;
+}
+
+/* Nombre del cliente (GUSTAVO) */
+.order-name {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900; /* Black */
+}
+
+/* Títulos/secciones */
+.hero-title,
+.past-orders-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600; /* SemiBold */
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Barra superior: marca/fecha/estado */
+.logo {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900; /* Black para la marca */
+}
+.datetime,
+.conn {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500; /* Medium para legibilidad */
+}
+
+/* Lista de órdenes pasadas */
+.order-number-past {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500; /* Medium */
+}
+.order-name-past {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400; /* Regular */
+}
+
+/* Franja de promoción inferior */
+.promotion {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: .5px;
+}
+
+/* Mantener siempre la posición de los elementos principales */
+
+/* Título principal */
+.hero-title {
+  min-height: 3rem; /* ajusta según el tamaño de fuente que uses */
+  display: flex;
+  align-items: center; /* centra verticalmente */
+  justify-content: center; /* centra horizontalmente */
+}
+
+/* Número de orden */
+.order-number {
+  min-height: 12rem; /* acorde a font-size: 11rem */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Nombre del cliente */
+.order-name {
+  min-height: 4rem; /* ajusta según el tamaño de fuente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ---------- Hero fijo: título, número y nombre no se mueven ---------- */
+.hero-section {
+  /* 3 filas: título, número, nombre */
+  display: grid;
+  grid-template-rows: 3.2rem 16rem 6rem; /* ajusta si cambias tamaños */
+  align-items: center;
+  justify-items: center;
+  /* Tip: evita que el contenido “empuje” por padding extra */
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+/* Título */
+.hero-title {
+  height: 3.2rem;
+  line-height: 3.2rem;
+  margin: 0;                 /* evita empujar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Número de orden (Anton, 15rem) */
+.order-number {
+  height: 16rem;             /* reserva fija para el número */
+  line-height: 16rem;        /* centra vertical sin flex extra */
+  margin: 0;                 /* quita margen que hacía “brincar” */
+  font-size: 15rem;          /* tu tamaño actual */
+  overflow: hidden;          /* evita desbordes por sombras, etc. */
+  display: block;            /* menos “magia” que flex aquí */
+  letter-spacing: 2px;       /* conservamos tu tracking */
+}
+
+/* Nombre del cliente */
+.order-name {
+  height: 6rem;              /* alto fijo de la franja del nombre */
+  line-height: 6rem;         /* centra vertical */
+  margin: 0;                 /* quita empujes verticales */
+  padding: 0 30px;           /* relleno lateral, no vertical */
+  display: block;
+  white-space: nowrap;       /* no partir en 2 líneas */
+  overflow: hidden;          /* recorta si es largo */
+  text-overflow: ellipsis;   /* “…” si se excede */
+  /* Si quieres que pueda reducir el tamaño en nombres larguísimos:
+     font-size: clamp(2.4rem, 3.5vw, 3.5rem); */
+}
+
+/* (Opcional) Si algún script deja vacío el texto, evita colapsos visuales */
+.hero-title:empty::before { content: ' '; }
+.order-number:empty::before { content: ' '; }
+.order-name:empty::before { content: ' '; }
+
+.promotion {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-weight: 400;
+  font-size: 1.6rem;
+  letter-spacing: .3px;
+  color: #fff;
+}
+
+.promo-accent {
+  font-weight: 700;
+  color: #ffb84d; /* dorado/naranja cálido */
+  text-shadow: 1px 1px 3px rgba(0,0,0,.45);
+}
+
+/* Solo resaltar el producto dentro de la frase */
+.promotion {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-weight: 400;
+  font-size: 1.6rem;
+  letter-spacing: .3px;
+  color: #fff;
+}
+
+.promo-accent {
+  font-weight: 700;
+  color: #ffb84d; /* dorado/naranja cálido */
+  text-shadow: 1px 1px 3px rgba(0,0,0,.45);
+}
+
+/* Fija el ancho del bloque de hora y usa números de ancho fijo */
+.topbar .datetime{
+  min-width: 260px;      /* reserva espacio suficiente */
+  text-align: right;     /* mantiene alineado el reloj a la derecha */
+  font-variant-numeric: tabular-nums;     /* números “monoespaciados” */
+  font-feature-settings: "tnum" 1;        /* refuerzo por si la fuente lo soporta */
+}
+
+.topbar #connStatus{ min-width: 120px; text-align: right; }
+
+.order-name{
+	text-transform: uppercase;
+}
+.order-name-past{
+	text-transform: uppercase;
+}
