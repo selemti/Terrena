@@ -21,25 +21,29 @@ export function renderKPIs(){
   els.kpiDifProm   && (els.kpiDifProm.textContent   = MXN.format(0));
 }
 
+// mainTable.js
 export function puedeWizard(r){
-  // Reglas: caja asignada, activa y con usuario asignado
-  return !!(r?.status?.activa && r?.status?.asignada && r?.assigned_user);
+  const activoAsignado = !!(r?.status?.activa && r?.status?.asignada && r?.assigned_user);
+  const habilitadoPaso3 = !!(r?.flags?.precorte_listo && r?.flags?.sin_postcorte);
+  return activoAsignado || habilitadoPaso3;
 }
 
+
+// usar fallback de usuario de la sesión para abrir el wizard  :contentReference[oaicite:1]{index=1}
 export function renderAcciones(r){
   if (!puedeWizard(r)) return '';
-
   const store    = (document.querySelector('#filtroSucursal')?.value) || 1;
   const bdate    = r?.window?.day || state.date || currentDate();
   const opening  = Number((r.opening_float ?? r.opening_balance) || 0);
   const sesionId = (r?.sesion?.id ?? r?.status?.sesion_id ?? '');
+  const userId   = r.assigned_user ?? r?.sesion?.cajero_usuario_id; // fallback
 
   return `
     <button class="btn btn-sm btn-primary"
             data-caja-action="wizard"
             data-store="${esc(store)}"
             data-terminal="${esc(r.id)}"
-            data-user="${esc(r.assigned_user)}"
+            data-user="${esc(userId)}"
             data-bdate="${esc(bdate)}"
             data-opening="${esc(opening)}"
             data-sesion="${esc(sesionId)}"
@@ -48,33 +52,35 @@ export function renderAcciones(r){
     </button>`;
 }
 
+
+
+// badge Estado: mostrar “Validación” si aplica paso 3 sin asignación  :contentReference[oaicite:2]{index=2}
 export function renderTabla(){
   if (!els.tbody) return;
   els.tbody.innerHTML = '';
 
   state.data.forEach(r=>{
+    const enValidacion = (!!r?.flags?.precorte_listo && !!r?.flags?.sin_postcorte) && !r?.status?.asignada;
+    const badgeEstado = r?.status?.asignada
+      ? (r?.status?.activa ? '<span class="badge bg-success">Asignada</span>'
+                           : '<span class="badge bg-info">En Corte</span>')
+      : (enValidacion ? '<span class="badge bg-warning text-dark">Validación</span>'
+                      : '<span class="badge bg-secondary">Cerrada</span>');
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${esc(r.location ?? '—')}</td>
       <td>${esc(r.name ?? r.id ?? '—')}</td>
       <td>${esc(r.assigned_name ?? '—')}</td>
       <td>${esc(r?.window?.day ?? state.date ?? '—')}</td>
-      <td>${
-        r?.status?.asignada
-          ? (r?.status?.activa ? '<span class="badge bg-success">Asignada</span>'
-                                : '<span class="badge bg-info">Asignada</span>')
-          : '<span class="badge bg-secondary">Cerrada</span>'
-      }</td>
+      <td>${badgeEstado}</td>
       <td class="text-end">${MXN.format(Number(r.opening_balance||0))}</td>
       <td class="text-end">${MXN.format(Number(r?.sales?.assigned_total ?? r?.sales?.terminal_total ?? 0))}</td>
       <td class="text-end">${MXN.format(0)}</td>
-      <td class="text-end">
-        <div class="d-flex flex-wrap gap-2">${renderAcciones(r)}</div>
-      </td>`;
+      <td class="text-end"><div class="d-flex flex-wrap gap-2">${renderAcciones(r)}</div></td>`;
     els.tbody.appendChild(tr);
   });
 
-  // Delegado: enlaza el botón wizard recién pintado
   els.tbody.querySelectorAll('[data-caja-action="wizard"]').forEach(btn=>{
     if (btn.dataset.bound === '1') return;
     btn.dataset.bound = '1';

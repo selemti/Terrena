@@ -88,4 +88,10 @@ $app->get('/conciliacion/{sesion_id:\d+}', [ConciliacionController::class, 'getB
 // Formas de pago
 $app->get('/formas-pago', [FormasPagoController::class, 'getAll']);
 
+// Nuevo (REST)
+$app->post('/postcortes', [PostCorteController::class, 'create']);
+
+// Legacy opcional
+$app->map(['GET','POST'], '/caja/postcorte_create.php', [PostCorteController::class, 'create']);
+
 $app->run();

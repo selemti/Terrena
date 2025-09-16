@@ -3,8 +3,7 @@ import { BASE, DENOMS, MXN, api } from './config.js';
 import { $, GET, GET_SOFT, POST_FORM, toast } from './helpers.js';
 import { els, state } from './state.js';
 
-
-/* ================== STEP / UI ================== */
+/* =============== STEP / UI =============== */
 export function setStep(n){
   state.step = n;
   if (!els.modal) return;
@@ -26,44 +25,91 @@ export function setStep(n){
   if (els.btnCerrarSesion)    els.btnCerrarSesion.classList.toggle('d-none', n!==3);
   if (els.btnSincronizarPOS)  els.btnSincronizarPOS.classList.toggle('d-none', n!==2);
 
-  // seguridad adicional: no permitir continuar si no se ha guardado
+  // seguridad: no permitir continuar si no se ha guardado
   if (els.btnContinuarConc) els.btnContinuarConc.disabled = !state.pasoGuardado;
 }
 
 function ensureModalRefs(){
-  const modal = document.querySelector('#modalPrecorte, #wizardPrecorte, .modal[data-role="precorte"]');
+  const modal = document.querySelector('#czModalPrecorte, #modalPrecorte, #wizardPrecorte, .modal[data-role="precorte"]');
   els.modal = modal || null;
   if (!els.modal) return false;
 
-  els.step1  = els.modal.querySelector('#step1,[data-step="1"]');
-  els.step2  = els.modal.querySelector('#step2,[data-step="2"]');
-  els.step3  = els.modal.querySelector('#step3,[data-step="3"]');
-  els.stepBar= els.modal.querySelector('.progress-bar,[data-role="stepbar"]');
+  // steps + barra
+  els.step1  = els.modal.querySelector('#czStep1,#step1,[data-step="1"]');
+  els.step2  = els.modal.querySelector('#czStep2,#step2,[data-step="2"]');
+  els.step3  = els.modal.querySelector('#czStep3,#step3,[data-step="3"]');
+  els.stepBar= els.modal.querySelector('#czStepBar,.progress-bar,[data-role="stepbar"]');
 
-  els.btnGuardarPrecorte = els.modal.querySelector('#btnGuardarPrecorte,[data-action="guardar-precorte"]');
-  els.btnContinuarConc   = els.modal.querySelector('#btnContinuarConc,[data-action="continuar-conc"]');
-  els.btnSincronizarPOS  = els.modal.querySelector('#btnSincronizarPOS,[data-action="sincronizar-pos"]');
-  els.btnIrPostcorte     = els.modal.querySelector('#btnIrPostcorte,[data-action="ir-postcorte"]');
-  els.btnCerrarSesion    = els.modal.querySelector('#btnCerrarSesion,[data-action="cerrar-sesion"]');
+  // botones (incluye cz*)
+  els.btnGuardarPrecorte = els.modal.querySelector('#czBtnGuardarPrecorte,#btnGuardarPrecorte,[data-action="guardar-precorte"]');
+  els.btnContinuarConc   = els.modal.querySelector('#czBtnContinuarConciliacion,#btnContinuarConc,[data-action="continuar-conc"]');
+  els.btnSincronizarPOS  = els.modal.querySelector('#czBtnSincronizarPOS,#btnSincronizarPOS,[data-action="sincronizar-pos"]');
+  els.btnIrPostcorte     = els.modal.querySelector('#czBtnIrPostcorte,#btnIrPostcorte,[data-action="ir-postcorte"]');
+  els.btnCerrarSesion    = els.modal.querySelector('#czBtnCerrarSesion,#btnCerrarSesion,[data-action="cerrar-sesion"]');
   els.btnAutorizar       = els.modal.querySelector('[data-action="autorizar-corte"]');
 
-  els.tablaDenomsBody = els.modal.querySelector('#tablaDenomsBody,[data-role="denoms-body"]');
-  els.precorteTotal   = els.modal.querySelector('#precorteTotal,[data-role="precorte-total"]');
-  els.declCredito     = els.modal.querySelector('#declCredito,[data-role="decl-credito"]');
-  els.declDebito      = els.modal.querySelector('#declDebito,[data-role="decl-debito"]');
-  els.declTransfer    = els.modal.querySelector('#declTransfer,[data-role="decl-transfer"]');
-  els.notasPaso1      = els.modal.querySelector('#notasPaso1,[data-role="notas-paso1"]');
+  // campos paso 1
+  els.tablaDenomsBody = els.modal.querySelector('#czTablaDenoms tbody,#tablaDenomsBody,[data-role="denoms-body"]');
+  els.precorteTotal   = els.modal.querySelector('#czPrecorteTotal,#precorteTotal,[data-role="precorte-total"]');
+  els.declCredito     = els.modal.querySelector('#czDeclCardCredito,#declCredito,[data-role="decl-credito"]');
+  els.declDebito      = els.modal.querySelector('#czDeclCardDebito,#declDebito,[data-role="decl-debito"]');
+  els.declTransfer    = els.modal.querySelector('#czDeclTransfer,#declTransfer,[data-role="decl-transfer"]');
+  els.notasPaso1      = els.modal.querySelector('#czNotes,#notasPaso1,[data-role="notas-paso1"]');
 
-  els.chipFondo       = els.modal.querySelector('[data-role="chip-fondo"]');
-  els.efEsperadoInfo  = els.modal.querySelector('[data-role="ef-esperado"]');
-  els.concGrid        = els.modal.querySelector('#concGrid,[data-role="conc-grid"]');
-  els.bannerFaltaCorte= els.modal.querySelector('[data-role="banner-falta-corte"]');
+  // paso 2
+  els.chipFondo       = els.modal.querySelector('#czChipFondo,[data-role="chip-fondo"]');
+  els.efEsperadoInfo  = els.modal.querySelector('#czEfectivoEsperado,[data-role="ef-esperado"]');
+  els.concGrid        = els.modal.querySelector('#czConciliacionGrid,#concGrid,[data-role="conc-grid"]');
+  els.bannerFaltaCorte= els.modal.querySelector('#czBannerFaltaCorte,[data-role="banner-falta-corte"]');
 
-  els.inputPrecorteId = document.querySelector('#precorteId,[data-role="precorte-id"]');
+  // hidden
+  els.inputPrecorteId = document.querySelector('#cz_precorte_id,#precorteId,[data-role="precorte-id"]');
   return true;
 }
 
-/* ================== DENOMS (Paso 1) ================== */
+/* === ÚNICO handler para “Ir a Postcorte” (sin duplicados) === */
+function bindIrPostcorteUnique(){
+  if (!els || !els.btnIrPostcorte) return;
+
+  const old = els.btnIrPostcorte;
+  const clone = old.cloneNode(true);
+  old.replaceWith(clone);
+  els.btnIrPostcorte = clone;
+
+  els.btnIrPostcorte.disabled = false;
+
+  els.btnIrPostcorte.addEventListener('click', async (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    if (els.btnIrPostcorte.__busy) return;
+    els.btnIrPostcorte.__busy = true;
+
+    try {
+      if (state.necesitaAut && !state.autorizado){
+        const ok = await confirmElegante(
+          'Autorización requerida',
+          '<p>Existe diferencia mayor al umbral. ¿Autorizar y continuar?</p>',
+          'Cancelar','Autorizar'
+        );
+        if (!ok) return;
+
+        try {
+          await POST_FORM(`${BASE}/api/caja/precorte_status.php?id=${state.precorteId}`, {
+            autorizado: 1, autorizado_por: 'admin'
+          });
+        } catch(_) { /* backend legacy: continuar */ }
+
+        state.autorizado = true;
+      }
+
+      await irAPostcorte();   // 👈 importante
+    } finally {
+      els.btnIrPostcorte.__busy = false; // 👈 siempre se libera
+    }
+  });
+}
+
+
+/* =============== DENOMS (Paso 1) =============== */
 export function bindDenoms(){
   if (!els.tablaDenomsBody) return;
   els.tablaDenomsBody.innerHTML = '';
@@ -90,12 +136,11 @@ export function bindDenoms(){
 }
 
 export function recalcPaso1(){
-  // total efectivo
   let totalEf = 0;
   state.denoms.forEach((qty,den)=> totalEf += den*qty);
   if (els.precorteTotal) els.precorteTotal.textContent = MXN.format(totalEf);
 
-  // no-efectivo: usuario DEBE capturar al menos "0" en TODOS
+  // no-efectivo: el usuario debe tocar los 3 campos (>=0)
   const camposNE = [els.declCredito, els.declDebito, els.declTransfer];
   const filledNE = camposNE.every(el=>{
     if (!el) return false;
@@ -105,7 +150,7 @@ export function recalcPaso1(){
     return touched && raw !== '' && !Number.isNaN(num) && num >= 0;
   });
 
-  const okDenoms = totalEf > 0; // Efectivo > 0 siempre
+  const okDenoms = totalEf > 0;
   if (els.btnGuardarPrecorte) els.btnGuardarPrecorte.disabled = !(okDenoms && filledNE);
   if (els.btnContinuarConc)   els.btnContinuarConc.disabled   = !state.pasoGuardado;
 
@@ -113,8 +158,7 @@ export function recalcPaso1(){
   if (els.efEsperadoInfo) els.efEsperadoInfo.textContent = MXN.format(state.sesion.opening||0);
 }
 
-/* ================== ABRIR WIZARD ================== */
-/* ================== ABRIR WIZARD ================== */
+/* =============== ABRIR WIZARD =============== */
 export async function abrirWizard(ev){
   ev?.preventDefault?.();
 
@@ -155,7 +199,7 @@ export async function abrirWizard(ev){
       }
     }
 
-    // 1) Crear/recuperar precorte (idempotente)
+    // 1) Crear/recuperar precorte
     const payload = { bdate, store_id:store, terminal_id:terminal, user_id:user, sesion_id: sesion || '' };
     const j = await POST_FORM(api.precorte_create(), payload);
     if (!j?.ok || !j?.precorte_id){
@@ -165,7 +209,7 @@ export async function abrirWizard(ev){
     state.precorteId = j.precorte_id;
     els.inputPrecorteId && (els.inputPrecorteId.value = String(state.precorteId));
 
-    // 2) Cargar refs UI
+    // 2) UI
     if (!ensureModalRefs()){
       fallbackModal(`Precorte #${state.precorteId} listo, pero no se encontró el modal real. Incluye <code>_wizard_modals.php</code>.`);
       btn.__busy=false; return;
@@ -173,37 +217,34 @@ export async function abrirWizard(ev){
     wireDelegates();
     bindModalButtons();
 
-    // 3) Decidir paso SOLO por estatus guardado (ENVIADO). Nada de "ya_existia".
-    //    Usamos el endpoint de status (GET /caja/precorte_status.php/{id})
+    // 3) Decidir paso por estatus (ENVIADO ⇒ Paso 2)
     let est = (j?.estatus || '').toUpperCase();
     try{
-      const st = await GET(`${BASE}/api/caja/precorte_status.php/${state.precorteId}`);
+      const st = await GET_SOFT(`${BASE}/api/caja/precorte_status.php?id=${state.precorteId}`);
       if (st?.estatus) est = String(st.estatus).toUpperCase();
-    }catch(_){ /* si falla, usamos j.estatus si venía */ }
+    }catch(_){}
 
-    const abrirPaso2 = (est === 'ENVIADO'); // <-- ÚNICA condición para iniciar en Paso 2
+    const abrirPaso2 = (est === 'ENVIADO');
     if (abrirPaso2){
       setStep(2);
       try { window.bootstrap?.Modal.getOrCreateInstance(els.modal,{backdrop:'static',keyboard:false}).show(); } catch(_){}
-      await sincronizarPOS(true);   // puede devolver 412 si aún no hay DPR → banner
+      await sincronizarPOS(true);        // puede mostrar banner si falta DPR
+      bindIrPostcorteUnique();           // único handler
       btn.__busy = false; return;
     }
 
-    // 4) Paso 1 (captura inicial)
+    // Paso 1
     [els.declCredito, els.declDebito, els.declTransfer].forEach(el=>{
       if (!el) return;
       el.addEventListener('input', ()=>{ el.dataset.touched='1'; recalcPaso1(); });
       el.addEventListener('blur',  ()=>{ el.dataset.touched='1'; recalcPaso1(); });
       el.placeholder = '0';
     });
-
     bindDenoms();
     recalcPaso1();
     setStep(1);
-
-    try {
-      window.bootstrap?.Modal.getOrCreateInstance(els.modal, { backdrop:'static', keyboard:false }).show();
-    } catch(_){}
+    try { window.bootstrap?.Modal.getOrCreateInstance(els.modal,{backdrop:'static',keyboard:false}).show(); } catch(_){}
+    bindIrPostcorteUnique();             // por si el usuario llega a Paso 2 después
 
   } catch(e){
     if (e?.status === 409 && e?.payload?.tickets_abiertos != null){
@@ -218,7 +259,7 @@ export async function abrirWizard(ev){
   }
 }
 
-/* ================== GUARDAR (Paso 1) ================== */
+/* =============== GUARDAR (Paso 1) =============== */
 async function guardarPrecorte(){
   if (!state.precorteId){ toast('No hay precorte activo','err',9000,'Error'); return; }
 
@@ -230,25 +271,21 @@ async function guardarPrecorte(){
   const transfer = Number(els.declTransfer?.value);
   const notas    = String(els.notasPaso1?.value||'').trim();
   const esperado = Number(state.sesion.opening||0);
-  const difEf = totalEf - esperado;
   const totalNoEf = (credito||0)+(debito||0)+(transfer||0);
   const totalDecl = totalEf + totalNoEf;
 
-
-  // Confirmación bonita
   const html = `
     <div class="mb-2">Se guardará el precorte <b>#${state.precorteId}</b> con:</div>
-	<table class="table table-sm align-middle mb-2">
-        <tbody>
-          <tr><td>Efectivo</td><td class="text-end fw-semibold">${MXN.format(totalEf)}</td></tr>
-          <tr><td>Tarjeta crédito</td><td class="text-end">${MXN.format(credito)}</td></tr>
-          <tr><td>Tarjeta débito</td><td class="text-end">${MXN.format(debito)}</td></tr>
-          <tr><td>Transferencias</td><td class="text-end">${MXN.format(transfer)}</td></tr>
-          <tr class="table-light">
-            <th>Total declarado</th>
-            <th class="text-end">${MXN.format(totalDecl)}</th>
-          </tr>
-        </tbody>
+    <table class="table table-sm align-middle mb-2">
+      <tbody>
+        <tr><td>Efectivo</td><td class="text-end fw-semibold">${MXN.format(totalEf)}</td></tr>
+        <tr><td>Tarjeta crédito</td><td class="text-end">${MXN.format(credito)}</td></tr>
+        <tr><td>Tarjeta débito</td><td class="text-end">${MXN.format(debito)}</td></tr>
+        <tr><td>Transferencias</td><td class="text-end">${MXN.format(transfer)}</td></tr>
+        <tr class="table-light">
+          <th>Total declarado</th><th class="text-end">${MXN.format(totalDecl)}</th>
+        </tr>
+      </tbody>
     </table>
     ${notas ? `<div class="small text-muted">Notas: ${notas}</div>` : '' }
   `;
@@ -256,7 +293,7 @@ async function guardarPrecorte(){
   if (!ok) return;
 
   try{
-    // Persistir (precorte_efectivo + precorte_otros) — backend legacy lo maneja
+    // Persistir (precorte_efectivo + precorte_otros)
     const payload = {
       denoms_json: JSON.stringify(denoms),
       declarado_credito:  credito,
@@ -267,10 +304,12 @@ async function guardarPrecorte(){
     const j = await POST_FORM(api.precorte_update(state.precorteId), payload);
     if (!j?.ok){ toast('No se pudo guardar precorte','err', 9000, 'Error'); return; }
 
-    // Estatus: sesion_cajon → LISTO_PARA_CORTE, precorte → ENVIADO
-    await POST_FORM(`${BASE}/api/caja/precorte_status.php?id=${state.precorteId}`, {
-      sesion_estatus:'LISTO_PARA_CORTE', precorte_estatus:'ENVIADO'
-    });
+    // Estatus: sesión → LISTO_PARA_CORTE, precorte → ENVIADO (tolerante a 500)
+    try {
+      await POST_FORM(`${BASE}/api/caja/precorte_status.php?id=${state.precorteId}`, {
+        sesion_estatus:'LISTO_PARA_CORTE', precorte_estatus:'ENVIADO'
+      });
+    } catch(_){}
 
     state.pasoGuardado = true;
     els.btnContinuarConc && (els.btnContinuarConc.disabled = false);
@@ -278,22 +317,24 @@ async function guardarPrecorte(){
 
     setStep(2);
     await sincronizarPOS(true);
+    bindIrPostcorteUnique();
+
   }catch(e){
     toast(`Error guardando precorte: ${e.message}`,'err',9000,'Error');
   }
 }
 
-/* ================== Paso 2: Conciliación ================== */
+/* =============== Paso 2: Conciliación =============== */
 export async function sincronizarPOS(auto=false){
   if (!state.precorteId){ toast('No hay precorte activo','err', 9000, 'Error'); return; }
   els.bannerFaltaCorte?.classList.add('d-none');
   if (els.concGrid) els.concGrid.innerHTML = '<div class="text-muted small">Sincronizando con POS…</div>';
 
-  // usa GET_SOFT para que el 412 no truene ni loguee error ruidoso
+  // usa GET_SOFT para que un 412 no truene
   const j = await GET_SOFT(api.precorte_totales(state.precorteId));
 
   if (!j?.ok){
-    // 412 “suave” → mostrar banner sin tratarlo como error
+    // 412 suave: mostrar banner
     els.bannerFaltaCorte?.classList.remove('d-none');
     if (!auto){
       mostrarAvisoElegante(
@@ -311,6 +352,7 @@ export async function sincronizarPOS(auto=false){
   const d = j.data || {};
   renderConciliacion(d, j);
   await evaluarAutorizacion(d);
+  bindIrPostcorteUnique();
 }
 
 function badgeVeredicto(diff){
@@ -355,9 +397,7 @@ export function renderConciliacion(d, raw){
     </table>
     <div class="small text-muted">Fondo de caja (opening_float): ${MXN.format(Number(raw?.opening_float||state.sesion.opening||0))}</div>
   `;
-   // els.concGrid.innerHTML = html;
-   // evaluarAutorizacion(d);
-   els.concGrid.innerHTML = html;
+  els.concGrid.innerHTML = html;
 }
 
 function diffsMayores10(d){
@@ -372,22 +412,23 @@ function diffsMayores10(d){
 async function evaluarAutorizacion(d){
   const requiere = diffsMayores10(d);
   state.necesitaAut = !!requiere;
-  if (requiere){
-    toast('Diferencias > $10: requiere autorización','warn',0,'Autorización',{sticky:true});
-    try{ await POST_FORM(`${BASE}/api/caja/precorte_status.php?id=${state.precorteId}`, { requiere_autorizacion: 1 }); }catch(_){}
-  }
-  if (els.btnIrPostcorte) els.btnIrPostcorte.disabled = requiere && !state.autorizado;
+
+  // notifica pero NO bloquees si falla
+  try{
+    await POST_FORM(`${BASE}/api/caja/precorte_status.php?id=${state.precorteId}`, {
+      requiere_autorizacion: requiere ? 1 : 0
+    });
+  }catch(_){}
+
+  // habilitar botón (handler único ya hace el gateo)
+  if (els.btnIrPostcorte) els.btnIrPostcorte.disabled = false;
 }
 
-/* ================== Paso 3: Autorización ================== */
-// -- AJUSTA bindModalButtons para detener burbujeo (por si existiera el delegado):
-// ==== Bind directo a botones reales (con stopPropagation y validación de "Continuar") ====
+/* =============== Bind botones reales =============== */
 export function bindModalButtons(){
   if (!els.modal) return;
   if (els.modal.dataset.bound === '1') return;
   els.modal.dataset.bound = '1';
-  if (window.__CAJA_BOUND__) return;
-  window.__CAJA_BOUND__ = true;
 
   const stop = (fn)=> (ev)=>{ ev.preventDefault(); ev.stopPropagation(); fn(); };
 
@@ -412,10 +453,7 @@ export function bindModalButtons(){
     els.btnSincronizarPOS.addEventListener('click', stop(()=> sincronizarPOS(false)));
   }
 
-  if (els.btnIrPostcorte){
-    els.btnIrPostcorte.addEventListener('click', stop(()=> setStep(3)));
-    els.btnIrPostcorte.disabled = true;
-  }
+  // NO bindeamos aquí btnIrPostcorte (se hace con bindIrPostcorteUnique)
 
   if (els.btnAutorizar){
     els.btnAutorizar.addEventListener('click', async (ev)=>{
@@ -444,47 +482,60 @@ export function bindModalButtons(){
   }
 }
 
-// ==== Fallback delegado (sólo si NO existen los botones reales) ====
+/* =============== Paso 3: Postcorte =============== */
+async function irAPostcorte(){
+  if (!state.precorteId){ toast('No hay precorte activo','err',9000,'Error'); return; }
+
+  try{
+    const j = await POST_FORM(`${BASE}/api/postcortes`, { precorte_id: state.precorteId });
+    if (!j?.ok) throw new Error(j?.error || 'No se pudo generar el Post-corte');
+    setStep(3);
+    toast(`Post-corte #${j.postcorte_id} generado`, 'ok', 6000, 'Listo');
+    els.btnCerrarSesion?.focus?.();
+  }catch(e){
+    toast(`Error generando Post-corte: ${e.message}`,'err',9000,'Error');
+  }
+}
+
+/* =============== Fallback delegado (si no hay botones reales) =============== */
 function wireDelegates(){
   if (!els.modal) return;
   if (els.__wired) return; els.__wired = true;
 
-  // Si el HTML ya trae los botones, NO montamos delegado para evitar dobles clicks
   const hasBtns = !!(els.btnGuardarPrecorte || els.btnContinuarConc || els.btnSincronizarPOS || els.btnIrPostcorte);
   if (hasBtns) return;
 
-  // Forzar type="button" en posibles targets
   els.modal.querySelectorAll(
-    '#btnGuardarPrecorte,[data-action="guardar-precorte"],' +
-    '#btnContinuarConc,[data-action="continuar-conc"],' +
-    '#btnSincronizarPOS,[data-action="sincronizar-pos"],' +
-    '#btnIrPostcorte,[data-action="ir-postcorte"]'
+    '#czBtnGuardarPrecorte,#btnGuardarPrecorte,[data-action="guardar-precorte"],' +
+    '#czBtnContinuarConciliacion,#btnContinuarConc,[data-action="continuar-conc"],' +
+    '#czBtnSincronizarPOS,#btnSincronizarPOS,[data-action="sincronizar-pos"],' +
+    '#czBtnIrPostcorte,#btnIrPostcorte,[data-action="ir-postcorte"]'
   ).forEach(b=> b.setAttribute('type','button'));
 
   els.modal.addEventListener('click', (e)=>{
-    const save = e.target.closest('#btnGuardarPrecorte,[data-action="guardar-precorte"]');
+    const save = e.target.closest('#czBtnGuardarPrecorte,#btnGuardarPrecorte,[data-action="guardar-precorte"]');
     if (save){ e.preventDefault(); guardarPrecorte(); return; }
 
-    const cont = e.target.closest('#btnContinuarConc,[data-action="continuar-conc"]');
+    const cont = e.target.closest('#czBtnContinuarConciliacion,#btnContinuarConc,[data-action="continuar-conc"]');
     if (cont){
       e.preventDefault();
-      if (!state.pasoGuardado){
-        toast('Primero guarda el precorte.','warn', 5000, 'Validación');
-        return;
-      }
-      setStep(2);
-      return;
+      if (!state.pasoGuardado){ toast('Primero guarda el precorte.','warn',5000,'Validación'); return; }
+      setStep(2); return;
     }
 
-    const sync = e.target.closest('#btnSincronizarPOS,[data-action="sincronizar-pos"]');
+    const sync = e.target.closest('#czBtnSincronizarPOS,#btnSincronizarPOS,[data-action="sincronizar-pos"]');
     if (sync){ e.preventDefault(); sincronizarPOS(false); return; }
 
-    const post = e.target.closest('#btnIrPostcorte,[data-action="ir-postcorte"]');
-    if (post){ e.preventDefault(); setStep(3); return; }
+    const go3  = e.target.closest('#czBtnIrPostcorte,#btnIrPostcorte,[data-action="ir-postcorte"]');
+    if (go3){
+      e.preventDefault();
+      if (state.necesitaAut && !state.autorizado){ toast('Requiere autorización previa','warn',7000,'Validación'); return; }
+      irAPostcorte(); return;
+    }
   });
 }
 
-/* ================== Diálogos bonitos ================== */
+/* =============== Diálogos bonitos =============== */
 function mostrarAvisoElegante(titulo, htmlCuerpo, onRetry){
   if (window.bootstrap?.Modal) {
     const el = document.createElement('div');
@@ -570,13 +621,11 @@ function confirmElegante(titulo, htmlCuerpo, txtCancel='Cancelar', txtOk='Acepta
       m.show();
       return;
     }
-    // fallback simple
     resolve( confirm(`${titulo}\n\n${htmlCuerpo.replace(/<[^>]*>/g,'')}`) );
   });
 }
 
-
-/* ================== Fallback modal (debug) ================== */
+/* =============== Fallback modal (debug) =============== */
 function fallbackModal(html){
   let ov = document.getElementById('__debug_fallback_modal');
   if (!ov){
@@ -598,4 +647,5 @@ function fallbackModal(html){
   ov.style.display='flex';
 }
 
+// acceso global (como lo usas en la tabla)
 if (!window.abrirWizard) window.abrirWizard = abrirWizard;

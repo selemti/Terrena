@@ -3,57 +3,79 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class PostCorteController {
-    public static function create(Request $request, Response $response) {
-        $sid = qp($request, 'sesion_id');
-        $deE = (float)qp($request, 'declarado_efectivo_fin', 0);
-        $deT = (float)qp($request, 'declarado_tarjetas_fin', 0);
-        $not = qp($request, 'notas', null);
 
-        if(!$sid) return J($response, ['ok'=>false,'error'=>'missing_params (sesion_id)'],400);
+  // Reutiliza la misma conexión que PreCorteController
+  protected static function p(): \PDO {
+    return PreCorteController::p();
+  }
 
-        $sysE = 0.0; $sysT = 0.0;
-        try{
-            $v = pdo()->prepare("SELECT * FROM selemti.vw_conciliacion_sesion WHERE sesion_id=:sid");
-            $v->execute([':sid'=>$sid]);
-            if($row = $v->fetch()){
-                $sysE = (float)($row['sistema_efectivo_esperado'] ?? 0);
-                $credit   = (float)($row['sys_credit']   ?? $row['credit']   ?? 0);
-                $debit    = (float)($row['sys_debit']    ?? $row['debit']    ?? 0);
-                $transfer = (float)($row['sys_transfer'] ?? $row['transfer'] ?? 0);
-                $custom   = (float)($row['sys_custom']   ?? $row['custom']   ?? 0);
-                $sysT = $credit + $debit + $transfer + $custom;
-            }
-        } catch(Throwable $e){}
+  // POST /postcortes   (body: precorte_id)   |   POST /postcortes?id=##
+  public static function create(Request $request, Response $response, array $args = []) : Response {
+    $db = self::p();
 
-        $difE = $deE - $sysE;
-        $difT = $deT - $sysT;
+    // helpers locales
+    if (!function_exists('qp')) { function qp($r,$k,$def=null){ $q=$r->getQueryParams(); $p=(array)$r->getParsedBody(); return $p[$k]??$q[$k]??$def; } }
+    if (!function_exists('J'))  { function J($res,$a,$c=200){ $res=$res->withHeader('Content-Type','application/json')->withStatus($c); $res->getBody()->write(json_encode($a)); return $res; } }
 
-        $ver = function(float $dif): string {
-            if (abs($dif) <= DIFF_THRESHOLD) return 'CUADRA';
-            return $dif > 0 ? 'A_FAVOR' : 'EN_CONTRA';
-        };
+    // acepta body.precorte_id o query.id
+    $precorte_id = (int) qp($request, 'precorte_id', (int)qp($request,'id',0));
+    if ($precorte_id <= 0) return J($response, ['ok'=>false,'error'=>'missing_precorte_id'], 400);
 
-        try{
-            $ins = pdo()->prepare("
-                INSERT INTO selemti.postcorte
-                (sesion_id, sistema_efectivo_esperado, declarado_efectivo, diferencia_efectivo, veredicto_efectivo,
-                 sistema_tarjetas, declarado_tarjetas, diferencia_tarjetas, veredicto_tarjetas, notas)
-                VALUES
-                (:sid,:sysE,:deE,:difE,:verE,:sysT,:deT,:difT,:verT,:notas)
-                RETURNING id
-            ");
-            $ins->execute([
-                ':sid'=>$sid, ':sysE'=>$sysE, ':deE'=>$deE, ':difE'=>$difE, ':verE'=>$ver($difE),
-                ':sysT'=>$sysT, ':deT'=>$deT, ':difT'=>$difT, ':verT'=>$ver($difT), ':notas'=>$not
-            ]);
-            $pid = (int)$ins->fetch()['id'];
-            return J($response, [
-                'ok'=>true,'postcorte_id'=>$pid,
-                'efectivo'=>['esperado'=>$sysE,'declarado'=>$deE,'dif'=>$difE,'veredicto'=>$ver($difE)],
-                'tarjetas'=>['sistema'=>$sysT,'declarado'=>$deT,'dif'=>$difT,'veredicto'=>$ver($difT)]
-            ]);
-        } catch(Throwable $e){
-            return J($response, ['ok'=>false,'error'=>'postcorte_failed','message'=>$e->getMessage()],500);
-        }
+    try {
+      // Sesión del precorte (FK)
+      $sid = (int)$db->query("SELECT sesion_id FROM selemti.precorte WHERE id={$precorte_id}")->fetchColumn();
+      if (!$sid) return J($response, ['ok'=>false,'error'=>'precorte_not_found'], 404);
+
+      // Declarado efectivo
+      try {
+        $ef = (float)$db->query("SELECT COALESCE(SUM(subtotal),0) FROM selemti.precorte_efectivo WHERE precorte_id={$precorte_id}")->fetchColumn();
+      } catch (\Throwable $e) {
+        $ef = (float)$db->query("SELECT COALESCE(SUM(denominacion*cantidad),0) FROM selemti.precorte_efectivo WHERE precorte_id={$precorte_id}")->fetchColumn();
+      }
+
+      // Declarado tarjetas (CREDITO+DEBITO)
+      $tar = (float)$db->query("
+        SELECT COALESCE(SUM(monto),0)
+        FROM selemti.precorte_otros
+        WHERE precorte_id={$precorte_id} AND UPPER(tipo) IN ('CREDITO','DEBITO','DÉBITO')
+      ")->fetchColumn();
+
+      // NOT NULL → sistema en 0 (ajustaremos luego si ya tienes fuente)
+      $sefe = 0.00; // sistema_efectivo_esperado
+      $star = 0.00; // sistema_tarjetas
+
+      $difE = $ef  - $sefe;
+      $difT = $tar - $star;
+      $ver  = function($d){ return $d==0.0 ? 'CUADRA' : ($d>0 ? 'A_FAVOR' : 'EN_CONTRA'); };
+
+      $st = $db->prepare("
+        INSERT INTO selemti.postcorte
+        (sesion_id, sistema_efectivo_esperado, declarado_efectivo, diferencia_efectivo, veredicto_efectivo,
+         sistema_tarjetas, declarado_tarjetas, diferencia_tarjetas, veredicto_tarjetas,
+         creado_en, creado_por, notas)
+        VALUES
+        (:sid, :sefe, :defe, :dife, :vefe,
+               :star, :dtar, :ditar, :vtar,
+               now(), :usr, :notas)
+        RETURNING id
+      ");
+      $st->execute([
+        ':sid'  => $sid,
+        ':sefe' => $sefe, ':defe' => $ef,  ':dife' => $difE, ':vefe' => $ver($difE),
+        ':star' => $star, ':dtar' => $tar, ':ditar' => $difT, ':vtar' => $ver($difT),
+        ':usr'  => 1, ':notas' => ''
+      ]);
+      $id = (int)$st->fetchColumn();
+
+      return J($response, ['ok'=>true,'postcorte_id'=>$id,'sesion_id'=>$sid], 200);
+
+    } catch (\Throwable $e) {
+      // opcional: auditar error
+      try {
+        $a = $db->prepare("INSERT INTO selemti.auditoria(quien,que,payload) VALUES(1,'postcorte.create_error',:p)");
+        $a->execute([':p'=>json_encode(['precorte_id'=>$precorte_id,'msg'=>$e->getMessage()])]);
+      } catch (\Throwable $e2) {}
+      return J($response, ['ok'=>false,'error'=>'postcorte_insert_failed','detail'=>$e->getMessage()], 500);
     }
+  }
 }
